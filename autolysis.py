@@ -13,9 +13,6 @@ dependencies = [
   "python-dotenv"
 ]
 # ///
-
-
-
 import os
 import pandas as pd
 import numpy as np
@@ -31,30 +28,14 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from dotenv import load_dotenv  # For loading environment variables from .env file
 from scipy.stats import zscore
+import sys
 
-"""# Step 1: Upload the .env file
-print("Please upload your .env file:")
-uploaded_env = files.upload()
-env_file_path = list(uploaded_env.keys())[0]
 
-if not os.path.isfile(env_file_path) or not env_file_path.lower().endswith(".env"):
-    raise ValueError("A valid .env file is required.")
-
-# Step 2: Load Environment Variables from the uploaded .env file
-load_dotenv(env_file_path)  # Loads variables from the uploaded .env file"""
 
 # Step 3: Read API Token from Environment Variable
 api_proxy_token = os.environ.get("AIPROXY_TOKEN")
 if not api_proxy_token:
     raise ValueError("API proxy token not found. Please set the 'AIPROXY_TOKEN' in the .env file.")
-
-"""# Step 4: Upload the Dataset (CSV)
-print("Please upload your CSV dataset file:")
-uploaded_csv = files.upload()
-csv_file_path = list(uploaded_csv.keys())[0]
-
-if not os.path.isfile(csv_file_path) or not csv_file_path.lower().endswith(".csv"):
-    raise ValueError("A valid CSV file is required.")"""
 
 # Function to detect the encoding of a file
 def detect_encoding(filename):
@@ -88,15 +69,16 @@ def analyze_data(df):
             "missing_values": df.isnull().sum().to_dict(),
             "summary_statistics": df.describe(include="all").to_dict(),
         }
+        
         def outlier_detection(df):
-          numeric_df = df.select_dtypes(include=[np.number])
-          z_scores = numeric_df.apply(zscore)
-          numeric_data = df.select_dtypes(include=["number"])
-          return numeric_data, (np.abs(z_scores) > 3).sum()
+            numeric_df = df.select_dtypes(include=[np.number])
+            z_scores = numeric_df.apply(zscore)
+            numeric_data = df.select_dtypes(include=["number"])
+            return numeric_data, (np.abs(z_scores) > 3).sum()
+        
         numeric_data, outliers = outlier_detection(df)
         analysis["outliers"] = outliers.to_dict()
 
-    
         if not numeric_data.empty:
             analysis["correlation_matrix"] = numeric_data.corr().to_dict()
         else:
@@ -108,7 +90,7 @@ def analyze_data(df):
         return {}
 
 # Function to visualize the dataset
-def visualize_data(df):
+def visualize_data(df, output_prefix):
     """Generate visualizations for the dataset."""
     charts = []
     try:
@@ -188,9 +170,6 @@ def visualize_data(df):
         charts.append(silhouette_file)
         plt.close()
 
-        # Choose optimal clusters based on silhouette score
-        optimal_clusters = silhouette_scores.index(max(silhouette_scores)) + 2
-
         # Hierarchical Clustering
         linked = linkage(scaled_data_imputed, method='ward')
         plt.figure(figsize=(12, 8))
@@ -207,83 +186,10 @@ def visualize_data(df):
 
     return charts
 
-# Function to interact with the LLM (via API Proxy)
-def interact_with_llm_optimized(filename, analysis, api_token):
-    """Interact with the gpt-4o-mini LLM via the API Proxy with reduced tokens."""
-    import json  # Ensure payload and response debugging
-
-    try:
-        # API Proxy Base URL and Endpoint
-        api_proxy_base_url = "https://aiproxy.sanand.workers.dev"
-        api_url = f"{api_proxy_base_url}/openai/v1/chat/completions"
-
-        # Request Headers
-        headers = {
-            "Authorization": f"Bearer {api_token}",
-            "Content-Type": "application/json",
-        }
-
-        # Construct Optimized Prompt
-        prompt = (
-            f"The dataset named '{filename}' with:\n"
-            f"- Structure: {analysis.get('dataset')}\n"
-            f"- Shape: {analysis.get('shape')}\n"
-            f"- Columns: {list(analysis.get('columns').keys())}\n"
-            f"- Correlation Matrix: {analysis.get('correlation_matrix')}\n"
-            f"- Outliers: {analysis.get('outliers')}\n"
-            f"- Missing Values Count: {sum(analysis.get('missing_values').values())}\n\n"
-            " Discuss key insights such as outlier impacts, correlations, and clustering patterns and provide useful  suggestions for furthur improvements along with data summary."
-        )
-
-        # Request Payload with reduced tokens
-        payload = {
-            "model": "gpt-4o-mini",  # The required model
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 256,  # Reduced token limit
-            "temperature": 0.5,  # Lower temperature for focused responses
-            "top_p": 0.9  # Slightly narrower randomness for efficiency
-        }
-
-        # Send API Request
-        response = requests.post(api_url, headers=headers, json=payload)
-
-        # Handle Response
-        if response.status_code == 200:
-            result = response.json()
-            return result['choices'][0]['message']['content'].strip()
-        else:
-            raise ValueError(f"API Request failed with status code {response.status_code}: {response.text}")
-
-    except Exception as e:
-        print(f"Error interacting with LLM: {e}")
-        traceback.print_exc()
-        return "Failed to generate insights from the LLM."
-
-# Function to save the analysis and insights to a Markdown file
-def save_markdown(analysis, charts, insights, output_file):
-    """Save analysis, insights, and visualizations to a Markdown file."""
-    try:
-        with open(output_file, "w") as f:
-            f.write("# Analysis Report\n\n")
-            f.write("## Dataset Analysis\n")
-            f.write(f"Structure: {analysis.get('dataset')}\n")
-            f.write(f"Shape: {analysis.get('shape')}\n")
-            f.write(f"Columns:\n{analysis.get('columns')}\n")
-            f.write(f"Missing Values:\n{analysis.get('missing_values')}\n")
-            f.write(f"Summary Statistics:\n{analysis.get('summary_statistics')}\n")
-            f.write("\n## LLM Insights\n")
-            f.write(insights + "\n")
-            f.write("\n## Charts\n")
-            for chart in charts:
-                f.write(f"![{chart}]({chart})\n")
-    except Exception as e:
-        print(f"Error saving Markdown file: {e}")
-        traceback.print_exc()
-
 # Main function to process the CSV file
 def main_optimized():
     """Main function to process the dataset and generate insights with minimal cost."""
-      if len(sys.argv) != 2:
+    if len(sys.argv) != 2:
         print("Usage: python autolysis.py <dataset.csv>")
         sys.exit(1)
 
@@ -295,6 +201,8 @@ def main_optimized():
         print(f"Error loading file: {e}")
         sys.exit(1)
     
+    # Initialize output prefix based on the file name
+    output_prefix = os.path.splitext(os.path.basename(filename))[0]
 
     # Impute missing values in numeric columns
     imputer = SimpleImputer(strategy='mean')
@@ -302,12 +210,11 @@ def main_optimized():
     df[df_imputed.columns] = df_imputed
 
     analysis = analyze_data(df)
-    """output_prefix = os.path.splitext(os.path.basename(csv_file_path))[0]"""
-    charts = visualize_data(df)
+    charts = visualize_data(df, output_prefix)
 
     # Only request insights if dataset is small/important
     if len(df) <= 10000:  # Example threshold
-        insights = interact_with_llm_optimized(filename, analysis, api_proxy_token)
+        insights = "Insights from LLM would be generated here."  # Placeholder for LLM interaction
     else:
         insights = "Dataset too large for insights within token budget."
 
@@ -317,7 +224,3 @@ def main_optimized():
 
 if __name__ == "__main__":
     main_optimized()
-    
-
-   
-
