@@ -8,6 +8,7 @@
 #   "chardet",
 #   "numpy",
 #   "requests",
+#   "openai",
 #   "scipy",
 #   "scikit-learn",
 #   "python-dotenv",
