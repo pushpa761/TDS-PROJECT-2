@@ -7,11 +7,11 @@
 #   "httpx",
 #   "chardet",
 #   "numpy",
-#   "traceback"
-#   "requests"
-#   "scipy"
-#   "scikit-learn"
-#   "python-dotenv"
+#   "traceback",
+#   "requests",
+#   "scipy",
+#   "scikit-learn",
+#   "python-dotenv",
 #   "numpy"
 # ]
 # ///
