@@ -1,3 +1,20 @@
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#   "seaborn",
+#   "pandas",
+#   "matplotlib",
+#   "httpx",
+#   "chardet",
+#   "numpy",
+#   "requests",
+#   "scipy",
+#   "scikit-learn",
+#   "python-dotenv",
+#   "ipykernel",
+#   "python-dotenv",
+# ]
+# ///
 import os
 import pandas as pd
 import numpy as np
@@ -13,7 +30,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from dotenv import load_dotenv  # For loading environment variables from .env file
 from scipy.stats import zscore
-import traceback
+
 
 
 # Step 3: Read API Token from Environment Variable
