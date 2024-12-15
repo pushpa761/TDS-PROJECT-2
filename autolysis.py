@@ -9,6 +9,7 @@
 #   "numpy",
 #   "requests",
 #   "scipy",
+#   "openai",
 #   "scikit-learn",
 #   "python-dotenv",
 #   "ipykernel",
