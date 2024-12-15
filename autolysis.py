@@ -24,7 +24,6 @@ import matplotlib.pyplot as plt
 import traceback
 import chardet
 import requests
-from google.colab import files
 from sklearn.cluster import KMeans
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.metrics import silhouette_score
