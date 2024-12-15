@@ -6,8 +6,6 @@
 #   "matplotlib",
 #   "httpx",
 #   "chardet",
-#   "numpy",
-#   "traceback",
 #   "requests",
 #   "scipy",
 #   "scikit-learn",
