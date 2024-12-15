@@ -1,17 +1,19 @@
 # /// script
-requires-python = ">=3.11"
-dependencies = [
-  "seaborn",
-  "pandas",
-  "matplotlib",
-  "httpx",
-  "chardet",
-  "numpy",
-  "requests",
-  "scipy",
-  "scikit-learn",
-  "python-dotenv"
-]
+# requires-python = ">=3.9"
+# dependencies = [
+#   "pandas",
+#   "seaborn",
+#   "matplotlib",
+#   "numpy",
+#   "scipy",
+#   "openai",
+#   "httpx",
+#   "requests",
+#   "python-dotenv",
+#   "scikit-learn",
+#   "requests",
+#   "ipykernel",  # Added ipykernel
+# ]
 # ///
 import os
 import pandas as pd
