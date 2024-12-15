@@ -9,7 +9,6 @@
 #   "numpy",
 #   "requests",
 #   "scipy",
-#   "openai",
 #   "scikit-learn",
 #   "python-dotenv",
 #   "ipykernel",
@@ -24,6 +23,7 @@ import matplotlib.pyplot as plt
 import chardet
 import requests
 import openai
+import traceback
 from sklearn.cluster import KMeans
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.metrics import silhouette_score
@@ -137,21 +137,7 @@ def visualize_data(df, output_prefix):
         charts.append(heatmap_file)
         plt.close()
 
-        # Check if there are outliers to plot
-        if not outliers.empty and outliers.sum() > 0:
-            # Plot the outliers
-            plt.figure(figsize=(10, 6))
-            outliers.plot(kind='bar', color='red')
-            plt.title('Outliers Detection')
-            plt.xlabel('Columns')
-            plt.ylabel('Number of Outliers')
-            outliers_file = os.path.join(output_prefix, 'outliers.png')
-            plt.savefig(outliers_file)
-            plt.close()
-        else:
-            print("No outliers detected to visualize.")
-            outliers_file = None  # No file created for outliers
-
+      
         # Standardize data
         scaler = StandardScaler()
         scaled_data = scaler.fit_transform(numeric_columns)
@@ -320,4 +306,5 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: uv run autolysis.py <dataset_path>")
         sys.exit(1)
-    main_optimized(sys.argv[1])
+    filename= sys.argv[1]   
+    main_optimized(filename)
